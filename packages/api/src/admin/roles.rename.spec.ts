@@ -8,6 +8,7 @@ import {
 } from 'librechat-data-provider';
 import type { Response } from 'express';
 import type { ServerRequest } from '~/types/http';
+import { runTeardown } from '../__tests__/helpers/mongoTeardown';
 
 type DataSchemas = typeof import('@librechat/data-schemas');
 type Methods = ReturnType<DataSchemas['createMethods']>;
@@ -53,8 +54,10 @@ beforeAll(async () => {
 }, LIFECYCLE_TIMEOUT_MS);
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer?.stop();
+  await runTeardown(
+    () => mongoose.disconnect(),
+    () => mongoServer?.stop(),
+  );
 }, LIFECYCLE_TIMEOUT_MS);
 
 beforeEach(async () => {

@@ -10,6 +10,7 @@ import {
   RoleBits,
 } from '@librechat/data-schemas';
 import { AccessControlService } from './accessControlService';
+import { runTeardown } from '../__tests__/helpers/mongoTeardown';
 
 const backends = ['standalone', 'replica', ...(process.env.FERRETDB_URI ? ['ferret'] : [])];
 
@@ -74,9 +75,11 @@ describe.each(backends)('ACL updates on %s with secondaryPreferred defaults', (b
   });
 
   afterAll(async () => {
-    if (db.connection.readyState === 1) await db.connection.dropDatabase();
-    await db.disconnect();
-    await server?.stop();
+    await runTeardown(
+      () => (db.connection.readyState === 1 ? db.connection.dropDatabase() : undefined),
+      () => db.disconnect(),
+      () => server?.stop(),
+    );
   });
 
   it('detects the real capability and commits a permission update', async () => {

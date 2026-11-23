@@ -14,6 +14,7 @@ import {
   permissionErrorCode,
   ResourcePermissionsBusyError,
 } from './accessControlService';
+import { runTeardown } from '../__tests__/helpers/mongoTeardown';
 
 // Mock the logger
 jest.mock('@librechat/data-schemas', () => ({
@@ -60,8 +61,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer?.stop();
+  await runTeardown(
+    () => mongoose.disconnect(),
+    () => mongoServer?.stop(),
+  );
 });
 
 beforeEach(async () => {

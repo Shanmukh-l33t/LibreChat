@@ -17,6 +17,7 @@ import {
 import type { IAclEntry } from '@librechat/data-schemas';
 import type { Model } from 'mongoose';
 import { AccessControlService } from './accessControlService';
+import { runTeardown } from '../__tests__/helpers/mongoTeardown';
 
 let mongo: MongoMemoryServer;
 let entries: Model<IAclEntry>;
@@ -47,8 +48,10 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongo?.stop();
+  await runTeardown(
+    () => mongoose.disconnect(),
+    () => mongo?.stop(),
+  );
 });
 
 async function seed(permBits: number, tenantId?: string): Promise<void> {
@@ -490,8 +493,10 @@ describe('role-only ACL writes', () => {
         await session.endSession();
       }
     } finally {
-      await connection.disconnect();
-      await replica.stop();
+      await runTeardown(
+        () => connection.disconnect(),
+        () => replica.stop(),
+      );
     }
   }, 30000);
 

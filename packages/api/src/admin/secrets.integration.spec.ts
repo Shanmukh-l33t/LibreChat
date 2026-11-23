@@ -4,6 +4,7 @@ import { PrincipalModel, PrincipalType } from 'librechat-data-provider';
 import type { Config } from '@librechat/data-schemas';
 import type { Response } from 'express';
 import type { ServerRequest } from '~/types/http';
+import { runTeardown } from '../__tests__/helpers/mongoTeardown';
 
 process.env.CREDS_KEY =
   process.env.CREDS_KEY ?? '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
@@ -314,8 +315,10 @@ function createRealHandlers(
 }
 
 afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer?.stop();
+  await runTeardown(
+    () => mongoose.disconnect(),
+    () => mongoServer?.stop(),
+  );
 }, LIFECYCLE_TIMEOUT_MS);
 
 describe('config secret registry — real handlers against a real Config collection', () => {
