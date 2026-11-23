@@ -749,14 +749,14 @@ describe('createImageAuthorizationMiddleware', () => {
         [`${VICTIM_ID}/secret.png`, privateBytes],
         [`${OWNER_ID}/${AGENT_PATH.split('/').pop()}`, publicBytes],
         [`${VIEWER_ID}/profile.png`, ownerBytes],
-        [`${VIEWER_ID}/profile?draft.png`, ownerBytes],
+        [`${VIEWER_ID}/profile+draft.png`, ownerBytes],
         [`${VIEWER_ID}/profile#draft.png`, ownerBytes],
         [`${VIEWER_ID}/profile with spaces.png`, ownerBytes],
         [`${VIEWER_ID}/profile%2F.png`, ownerBytes],
-        [`${OWNER_ID}/${AGENT_PATH.split('/').pop()}?private.png`, privateBytes],
-        [`${OWNER_ID}/${AGENT_PATH.split('/').pop()}?manual=true`, privateBytes],
+        [`${OWNER_ID}/${AGENT_PATH.split('/').pop()}+private.png`, privateBytes],
+        [`${OWNER_ID}/${AGENT_PATH.split('/').pop()}+manual=true`, privateBytes],
         ...assistantFilenames.map((filename) => [`${OWNER_ID}/${filename}`, publicBytes] as const),
-        [`${OWNER_ID}/company logo.png?manual=true`, privateBytes],
+        [`${OWNER_ID}/company logo.png+manual=true`, privateBytes],
         [`${OWNER_ID}/company logo.png#private`, privateBytes],
         [`${OWNER_ID}/company%20logo.png`, privateBytes],
       ] as const;
@@ -843,7 +843,7 @@ describe('createImageAuthorizationMiddleware', () => {
 
       it.each([
         'profile.png?manual=true&ignored=%ZZ',
-        'profile%3Fdraft.png',
+        'profile%2Bdraft.png',
         'profile%23draft.png',
         'profile%20with%20spaces.png',
         'profile%252F.png',
@@ -887,7 +887,7 @@ describe('createImageAuthorizationMiddleware', () => {
         );
       });
 
-      it.each(['%3Fmanual=true', '%23private', '%2520logo.png'])(
+      it.each(['%2Bmanual=true', '%23private', '%2520logo.png'])(
         'does not alias an assistant filename suffix %s to a stored URL',
         async (suffix) => {
           const storedPath = `/images/${OWNER_ID}/${
@@ -919,8 +919,8 @@ describe('createImageAuthorizationMiddleware', () => {
           .expect(200);
         expect(response.body).toEqual(publicBytes);
         expect(response.headers['cache-control']).toBe('private, no-store');
-        await request(app).get(`${basePath}${AGENT_PATH}%3Fprivate.png`).expect(401);
-        await request(app).get(`${basePath}${AGENT_PATH}%3Fmanual=true`).expect(401);
+        await request(app).get(`${basePath}${AGENT_PATH}%2Bprivate.png`).expect(401);
+        await request(app).get(`${basePath}${AGENT_PATH}%2Bmanual=true`).expect(401);
       });
     });
   });

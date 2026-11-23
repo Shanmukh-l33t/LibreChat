@@ -37,7 +37,7 @@ describe('local file deletion', () => {
     expect(deleteRagFile).toHaveBeenCalledWith({ userId: 'user-1', file });
   });
 
-  it.each(['a#b.txt', 'what?.txt', '100%.txt', 'a%41.txt', 'my report.txt', '会社.txt'])(
+  it.each(['a#b.txt', 'what&.txt', '100%.txt', 'a%41.txt', 'my report.txt', '会社.txt'])(
     'removes the bytes saved as %s through the filepath returned at save time',
     async (name) => {
       const filepath = await saveLocalBuffer({

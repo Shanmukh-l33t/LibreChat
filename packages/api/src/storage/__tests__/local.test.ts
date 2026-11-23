@@ -67,7 +67,7 @@ describe('local storage writes', () => {
 
   it('returns a URL that addresses the stored file when the name has reserved characters', async () => {
     const paths = { publicPath: path.join(dir, 'public'), uploads: path.join(dir, 'uploads') };
-    const fileName = 'q#1 100%25?x=1.png';
+    const fileName = 'q#1 100%25&x=1.png';
 
     const url = await saveLocalBuffer({
       paths,
@@ -76,7 +76,7 @@ describe('local storage writes', () => {
       fileName,
     });
 
-    expect(url).toBe('/images/user1/q%231%20100%2525%3Fx%3D1.png');
+    expect(url).toBe('/images/user1/q%231%20100%2525%26x%3D1.png');
     const parsed = new URL(url, 'http://localhost');
     expect(parsed.pathname).toBe(url);
     expect(parsed.search).toBe('');
