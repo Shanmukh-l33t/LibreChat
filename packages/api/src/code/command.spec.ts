@@ -1078,21 +1078,23 @@ describe('createAttachedWorkspaceBashTool', () => {
       fetchImpl,
     });
     try {
-      const content = await bashTool.invoke({
-        command: 'cd child && printf "%s/%s" "${OLDPWD##*/}" "${PWD##*/}"',
-      });
+      // Query real directories with `pwd -P`; OLDPWD/PWD are shell-maintained and may be unset (WSL).
+      const stdoutOf = (output: string) => /stdout:\n([^\n]*)/.exec(output)?.[1] ?? '';
+      const start = stdoutOf(await bashTool.invoke({ command: 'pwd -P' }));
+      expect(start.endsWith('/project')).toBe(true);
+      const content = await bashTool.invoke({ command: 'pwd -P; cd ./child && pwd -P' });
       expect(content).toContain('[starting directory: "workspace/"]');
-      expect(content).toContain('stdout:\nproject/child');
-      expect(content).not.toContain(directory);
+      expect(content).toContain(`stdout:\n${start}\n${start}/child\n`);
+      expect(content.split('\n')[0]).not.toContain(directory);
       const fallback = await bashTool.invoke({
-        command: 'cd missing 2>/dev/null && printf unexpected || printf fallback',
+        command: 'cd missing 2>/dev/null && printf unexpected || printf "fallback\\n"; pwd -P',
       });
-      expect(fallback).toContain('stdout:\nfallback');
-      const next = await bashTool.invoke({ command: 'printf "%s" "${PWD##*/}"' });
-      expect(next).toContain('stdout:\nproject');
-      const scoped = await bashTool.invoke({ command: 'printf "%s" "${PWD##*/}"', cwd: 'child' });
+      expect(fallback).toContain(`stdout:\nfallback\n${start}\n`);
+      const next = await bashTool.invoke({ command: 'pwd -P' });
+      expect(next).toContain(`stdout:\n${start}\n`);
+      const scoped = await bashTool.invoke({ command: 'pwd -P', cwd: 'child' });
       expect(scoped).toContain('[starting directory: "workspace/child"]');
-      expect(scoped).toContain('stdout:\nchild');
+      expect(scoped).toContain(`stdout:\n${start}/child\n`);
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
